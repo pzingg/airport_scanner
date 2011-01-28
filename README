@@ -1,0 +1,15 @@
+airport_scanner
+
+Uses OS X's "airport" command-line utility to search for open and closed
+networks. Just collects the data and sorts by signal strength.  Also
+displays base station information read from a YAML database converting
+BSSID data to human-usable information.
+
+Have fun using this one!
+
+Just copy base_stations.yml.sample to base_stations.yml, add information
+on the closed networks to look for and the model and locations of your
+base stations, then run "ruby apscan.rb".
+
+Peter Zingg
+Kentfield School District

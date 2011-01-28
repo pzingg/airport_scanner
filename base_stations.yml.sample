@@ -1,0 +1,13 @@
+---
+closed_ssids:
+  - a closed network
+  - another network
+base_stations:
+  '00:11:24:ff:ff:ff':
+    model: Apple AirPort Extreme with 802.11g
+    name: airport_name
+    school: School Name
+    room: Room Number
+    ip_address: a.b.c.d
+    firmware: 5.5.1
+    available: 5.7
