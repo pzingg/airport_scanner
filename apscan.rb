@@ -23,12 +23,22 @@ OUI_DB = {
   '00:03:93' => 'Apple AirPort Extreme (A1034)',
   '00:07:40' => 'Buffalo WLA-G54',
   '00:11:24' => 'Apple AirPort Extreme with 802.11g',
+  '00:16:01' => 'Buffalo WZR-AG300NH',
   '00:16:cb' => 'Apple AirPort Extreme with 802.11g',
-  '00:1c:b3' => 'Apple Unknown',
+  '00:1b:63' => 'Apple AirPort Express',
+  '00:1c:b3' => 'Apple AirPort Extreme with 802.11n (Gigabit Ethernet)',
+  '00:1f:33' => 'Netgear WG111v2',
   '00:1f:f3' => 'Apple AirPort Extreme with 802.11n (Gigabit Ethernet)',
+  '00:21:f7' => 'HP ProCurve Unknown',
+  '00:22:75' => 'Belkin Wireless',
   '00:24:a5' => 'Buffalo WHR-HP-G54',
-  '00:25:3c' => '2Wire Unknown',
-  '3c:ea:4f' => '2Wire Unknown',
+  '00:25:3c' => '2Wire 3800 HGV-B U-verse Residential Gateway',
+  '00:ff:66' => 'Unregistered Unknown',
+  '30:46:9a' => 'Netgear WNDR3700',
+  '3c:ea:4f' => '2Wire i3812V',
+  '66:2a:2f' => 'Unregistered Unknown',
+  '68:7f:74' => 'Linksys WRT54GL',
+  'c0:3f:0e' => 'Netgear DG834G',
   'f8:1e:df' => 'Apple AirPort Extreme (Simultaneous Dual-Band II)',
 }.freeze
 
@@ -49,7 +59,7 @@ def wireless_scan(ssid)
   cmdline = "#{AIRPORT_CMD} --scan=#{ssid}"
   result_lines = IO.popen(cmdline, 'r') { |apio| apio.readlines }
   result_lines.each_with_index do |line, i|
-    next if i == 0
+    next if line.nil? || line.length < 40
     # Results are returned in a column-delimited format
     # SSID can include spaces in the name, so we need to get it from the
     # first 32 chars of the line; after that, we can use split for the 
@@ -63,6 +73,7 @@ def wireless_scan(ssid)
     # 6 - SECURITY (auth/unicast/group)
     ssid = line[0..31].strip
     bssid, rssi, channel, ht, cc, security = line[32..-1].strip.split(/\s+/)
+    next if bssid == 'BSSID'
     
     # put results in a hash based on BSSID
     res[bssid] = { :ssid => ssid, :channel => channel.to_i, 
@@ -73,7 +84,7 @@ end
 
 # scan and sort
 def scan_ssids
-  puts "Scan Started At #{Time.now.strftime("%a %b %d %Y at %I:%M %p")}"
+  puts "Scan started #{Time.now.strftime("%a %b %d %Y at %I:%M %p")}"
 
   # First scan open networks
   all_bs = wireless_scan(nil)
@@ -91,11 +102,11 @@ end
 
 # print out results
 def dump_results(all_bs)
-  puts "#{all_bs.length} Base Stations Listed by Strength"
+  puts "Found #{all_bs.length} base station(s), listed by signal strength"
   puts " "
   all_bs.each do |bssid, this_bs|
     bs_info = BASE_STATION_DB[bssid] || 
-      UNKNOWN_BS_INFO.update('model' => find_model(bssid))
+      UNKNOWN_BS_INFO.dup.update('model' => find_model(bssid))
   
     puts bssid
     puts "    ssid: #{this_bs[:ssid]}"
